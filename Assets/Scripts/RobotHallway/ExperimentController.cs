@@ -39,6 +39,12 @@ public class ExperimentController : MonoBehaviour
         DontDestroyOnLoad(player);
         DontDestroyOnLoad(this);
 
+        HeadTriggerEventScript ht = player.GetComponentInChildren<HeadTriggerEventScript>();
+        if (ht != null)
+        {
+            ht.OnHeadTriggered += HeadTriggered;
+        }
+
         SceneManager.sceneLoaded += SceneManager_sceneLoaded;
 
         SetupConditions();
@@ -50,11 +56,60 @@ public class ExperimentController : MonoBehaviour
     {
         conditions = new Queue<Condition>();
 
-        conditions.Enqueue(new Condition(ColorChangeBehavior.Red, Color.red, Condition.UnderglowPattern.Off, Condition.SpeedFast, Condition.Target.C, Condition.Target.B, Condition.PositionA, TurretBehavior.TurretState.None));
-        conditions.Enqueue(new Condition(ColorChangeBehavior.Yellow, Color.red, Condition.UnderglowPattern.Off, Condition.SpeedMedium, Condition.Target.B, Condition.Target.D, Condition.PositionB, TurretBehavior.TurretState.Sweep));
-        conditions.Enqueue(new Condition(ColorChangeBehavior.Black, Color.red, Condition.UnderglowPattern.Off, Condition.SpeedSlow, Condition.Target.D, Condition.Target.A, Condition.PositionC, TurretBehavior.TurretState.None));
-        conditions.Enqueue(new Condition(ColorChangeBehavior.Neutral, Color.red, Condition.UnderglowPattern.Off, Condition.SpeedFast, Condition.Target.A, Condition.Target.C, Condition.PositionD, TurretBehavior.TurretState.Fixed));
-        conditions.Enqueue(new Condition(ColorChangeBehavior.Green, Color.red, Condition.UnderglowPattern.Off, Condition.SpeedMedium, Condition.Target.C, Condition.Target.A, Condition.PositionE, TurretBehavior.TurretState.Track));
+        Condition c1 = new Condition();
+        c1.SetBodyColor(ColorChangeBehavior.Red);
+        c1.SetUnderglow(Color.red, Condition.UnderglowPattern.Off);
+        c1.SetSpeed(Condition.SpeedSlow);
+        c1.SetHallPosition(Condition.PositionA);
+        c1.SetRobotPositions(Condition.Target.C, Condition.Target.B);
+        c1.SetPlayerPositions(Condition.Target.A, Condition.Target.D);
+        c1.SetTurretBehavior(TurretBehavior.TurretState.Track);
+        c1.SetOpenDoors(new Condition.Door[] { Condition.Door.C, Condition.Door.A });
+        conditions.Enqueue(c1);
+
+        Condition c2 = new Condition();
+        c2.SetBodyColor(ColorChangeBehavior.Yellow);
+        c2.SetUnderglow(Color.red, Condition.UnderglowPattern.Off);
+        c2.SetSpeed(Condition.SpeedMedium);
+        c2.SetHallPosition(Condition.PositionB);
+        c2.SetRobotPositions(Condition.Target.B, Condition.Target.D);
+        c2.SetPlayerPositions(Condition.Target.D, Condition.Target.A);
+        c2.SetTurretBehavior(TurretBehavior.TurretState.None);
+        c2.SetOpenDoors(new Condition.Door[] { Condition.Door.B, Condition.Door.D, Condition.Door.A });
+        conditions.Enqueue(c2);
+
+        Condition c3 = new Condition();
+        c3.SetBodyColor(ColorChangeBehavior.Black);
+        c3.SetUnderglow(Color.red, Condition.UnderglowPattern.Off);
+        c3.SetSpeed(Condition.SpeedSlow);
+        c3.SetHallPosition(Condition.PositionC);
+        c3.SetRobotPositions(Condition.Target.D, Condition.Target.A);
+        c3.SetPlayerPositions(Condition.Target.A, Condition.Target.C);
+        c3.SetTurretBehavior(TurretBehavior.TurretState.None);
+        c3.SetOpenDoors(new Condition.Door[] { Condition.Door.CD, Condition.Door.A });
+        conditions.Enqueue(c3);
+
+        Condition c4 = new Condition();
+        c4.SetBodyColor(ColorChangeBehavior.Neutral);
+        c4.SetUnderglow(Color.red, Condition.UnderglowPattern.Off);
+        c4.SetSpeed(Condition.SpeedFast);
+        c4.SetHallPosition(Condition.PositionD);
+        c4.SetRobotPositions(Condition.Target.A, Condition.Target.C);
+        c4.SetPlayerPositions(Condition.Target.C, Condition.Target.A);
+        c4.SetTurretBehavior(TurretBehavior.TurretState.None);
+        c4.SetOpenDoors(new Condition.Door[] { Condition.Door.C, Condition.Door.A });
+        conditions.Enqueue(c4);
+
+        Condition c5 = new Condition();
+        c5.SetBodyColor(ColorChangeBehavior.Green);
+        c5.SetUnderglow(Color.red, Condition.UnderglowPattern.Off);
+        c5.SetSpeed(Condition.SpeedMedium);
+        c5.SetHallPosition(Condition.PositionE);
+        c5.SetRobotPositions(Condition.Target.C, Condition.Target.A);
+        c5.SetPlayerPositions(Condition.Target.A, Condition.Target.D);
+        c5.SetTurretBehavior(TurretBehavior.TurretState.None);
+        c5.SetOpenDoors(new Condition.Door[] { Condition.Door.D, Condition.Door.A });
+        conditions.Enqueue(c5);
     }
 
     void SceneManager_sceneLoaded(Scene scene, LoadSceneMode mode)
@@ -89,65 +144,30 @@ public class ExperimentController : MonoBehaviour
                     }
                 }
 
-                Debug.Log("Setting condition");
+                HallwayController hallControl = GameObject.FindGameObjectWithTag("HallwayController").GetComponent<HallwayController>();
+                hallControl.SetupCondition(conditions.Dequeue());
 
-                Condition c = conditions.Dequeue();
-
-                //set robot behaviors
-                rdb.SetSpeed(c.speed);
-                rdb.SetTargets(c.startTarget, c.goalTarget);
-                rdb.setHallwayPosition(c.hallwayPosition);
-
-                ccb.SetBodyColor(c.bodyColor);
-
-                tb.CurrentTurretState = c.turretBehavior;
-
-                //set robot start position/rotation
-                GameObject target;
-                if (c.startTarget == Condition.Target.A)
-                {
-                    target = GameObject.Find("TargetA");
-                }
-                else if (c.startTarget == Condition.Target.B)
-                {
-                    target = GameObject.Find("TargetB");
-                }
-                else if (c.startTarget == Condition.Target.C)
-                {
-                    target = GameObject.Find("TargetC");
-                }
-                else
-                {
-                    target = GameObject.Find("TargetD");
-                }
-
-                Debug.Log("Setting position to " + target.name + ": " + target.transform.position.ToString());
-                robot.transform.position = target.transform.position;
-
-                if (c.startTarget == Condition.Target.A || c.startTarget == Condition.Target.D)
-                {
-                    robot.transform.rotation = Quaternion.Euler(0, 90, 0);
-                    Debug.Log("Setting rotation to 90");
-                }
-                else
-                {
-                    robot.transform.rotation = Quaternion.Euler(0, 270, 0);
-                    Debug.Log("Setting rotation to 270");
-                }
-
-                Debug.Log("Robot rotation: " + target.transform.rotation.eulerAngles.ToString());
+                robot.GetComponent<TurretBehavior>().SetProximateObject(player.transform.GetChild(0).gameObject);
 
                 break;
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    void HeadTriggered(string tag)
     {
-
+        //Debug.Log("head triggered:" + tag);
+        switch (SceneManager.GetActiveScene().buildIndex)
+        {
+            case 1: //hallway
+                if (tag.Equals("Target"))
+                {
+                    SceneManager.LoadScene(1);
+                }
+                break;
+        }
     }
 
-    public class Condition
+    public class Condition : UnityEngine.Object
     {
         public static float PositionA = -0.77f;
         public static float PositionB = -0.61f;
@@ -157,7 +177,12 @@ public class ExperimentController : MonoBehaviour
 
         public enum Target
         {
-            A, B, C, D
+            A, B, C, D, None
+        }
+
+        public enum Door
+        {
+            A, B, C, D, AB, CD
         }
 
         public enum UnderglowPattern
@@ -167,29 +192,79 @@ public class ExperimentController : MonoBehaviour
 
         public static float SpeedFast = 1.4f;
         public static float SpeedMedium = 1.23f;
-        public static float SpeedSlow = 0.9f;
+        public static float SpeedSlow = 0.5f;
 
         public Color bodyColor;
         public Color underglowColor;
         public UnderglowPattern underglowPattern;
         public float speed;
-        public Target startTarget;
-        public Target goalTarget;
+        public Target robotStartTarget;
+        public Target robotGoalTarget;
+        public Target playerStartTarget;
+        public Target playerGoalTarget;
         public float hallwayPosition;
         public TurretBehavior.TurretState turretBehavior;
+        public Door[] openDoors;
 
-        public Condition(Color bodyColor, Color underglowColor, UnderglowPattern pattern, float speed, Target startPosition, Target goalPosition, float hallwayPosition, TurretBehavior.TurretState turretBehavior)
+        public Condition() : this(ColorChangeBehavior.Black, Color.black, UnderglowPattern.Off, 0.0f, Target.A, Target.B, Target.C, Target.D, PositionC, TurretBehavior.TurretState.None, null)
+        { }
+
+        public Condition(Color bodyColor, Color underglowColor, UnderglowPattern pattern, float speed, Target robotStartPosition, Target robotGoalPosition, Target playerStartPosition, Target playerGoalPosition, float hallwayPosition, TurretBehavior.TurretState turretBehavior, Door[] openDoors)
         {
             this.bodyColor = bodyColor;
             this.underglowColor = underglowColor;
             this.underglowPattern = pattern;
             this.speed = speed;
-            this.startTarget = startPosition;
-            this.goalTarget = goalPosition;
+            this.robotStartTarget = robotStartPosition;
+            this.robotGoalTarget = robotGoalPosition;
+            this.playerStartTarget = playerStartPosition;
+            this.playerGoalTarget = playerGoalPosition;
             this.hallwayPosition = hallwayPosition;
             this.turretBehavior = turretBehavior;
+            this.openDoors = openDoors;
         }
 
+        public void SetBodyColor(Color c)
+        {
+            this.bodyColor = c;
+        }
 
+        public void SetUnderglow(Color c, UnderglowPattern p)
+        {
+            this.underglowColor = c;
+            this.underglowPattern = p;
+        }
+
+        public void SetSpeed(float s)
+        {
+            this.speed = s;
+        }
+
+        public void SetHallPosition(float p)
+        {
+            this.hallwayPosition = p;
+        }
+
+        public void SetRobotPositions(Target start, Target end)
+        {
+            this.robotStartTarget = start;
+            this.robotGoalTarget = end;
+        }
+
+        public void SetPlayerPositions(Target start, Target end)
+        {
+            this.playerStartTarget = start;
+            this.playerGoalTarget = end;
+        }
+
+        public void SetTurretBehavior(TurretBehavior.TurretState t)
+        {
+            this.turretBehavior = t;
+        }
+
+        public void SetOpenDoors(Door[] d)
+        {
+            this.openDoors = d;
+        }
     }
 }

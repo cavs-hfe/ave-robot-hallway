@@ -106,19 +106,19 @@ public class TurretBehavior : MonoBehaviour
         }
 
         //get angle limits
-        float leftAngle = RestrictAngleRange((float)Math.Round(initialTurretRotation.eulerAngles.y - maxDegrees));
-        float rightAngle = RestrictAngleRange((float)Math.Round(initialTurretRotation.eulerAngles.y + maxDegrees));
+        float leftAngle = RestrictAngleRange((float)Math.Round(initialTurretRotation.eulerAngles.z - maxDegrees));
+        float rightAngle = RestrictAngleRange((float)Math.Round(initialTurretRotation.eulerAngles.z + maxDegrees));
 
         //restrict turret movement to max range
-        float currentAngle = (float)Math.Round(gunMount.transform.localRotation.eulerAngles.y);
+        float currentAngle = (float)Math.Round(gunMount.transform.localRotation.eulerAngles.z);
 
         if (currentAngle > rightAngle && currentAngle < 180)
         {
-            gunMount.transform.localRotation = Quaternion.Euler(gunMount.transform.localRotation.eulerAngles.x, rightAngle, gunMount.transform.localRotation.eulerAngles.z);
+            gunMount.transform.localRotation = Quaternion.Euler(gunMount.transform.localRotation.eulerAngles.x, gunMount.transform.localRotation.eulerAngles.y, rightAngle);
         }
         else if (currentAngle < leftAngle && currentAngle > 180)
         {
-            gunMount.transform.localRotation = Quaternion.Euler(gunMount.transform.localRotation.eulerAngles.x, leftAngle, gunMount.transform.localRotation.eulerAngles.z);
+            gunMount.transform.localRotation = Quaternion.Euler(gunMount.transform.localRotation.eulerAngles.x, gunMount.transform.localRotation.eulerAngles.y, leftAngle);
         }
     }
 
@@ -127,12 +127,12 @@ public class TurretBehavior : MonoBehaviour
     /// </summary>
     private void Sweep()
     {
-        if (Math.Round(gunMount.transform.localRotation.eulerAngles.y) == targetDegrees)
+        if (Math.Round(gunMount.transform.localRotation.eulerAngles.z) == targetDegrees)
         {
             sweepDirection = sweepDirection * -1;
             targetDegrees = RestrictAngleRange(targetDegrees + sweepDirection * 2 * sweepDegrees);            
         }
-        gunMount.transform.localRotation = Quaternion.AngleAxis(gunMount.transform.localRotation.eulerAngles.y + (Time.deltaTime * degreesPerSecond * sweepDirection), Vector3.up);
+        gunMount.transform.localRotation = Quaternion.AngleAxis(gunMount.transform.localRotation.eulerAngles.z + (Time.deltaTime * degreesPerSecond * sweepDirection), Vector3.forward);
     }
 
     /// <summary>
@@ -141,7 +141,7 @@ public class TurretBehavior : MonoBehaviour
     private void Track()
     {
         Quaternion rotation = Quaternion.LookRotation(proximateObject.transform.position - gunMount.transform.position);
-        Quaternion flatRotation = Quaternion.Euler(0, rotation.eulerAngles.y, 0);
+        Quaternion flatRotation = Quaternion.Euler(0, 0, rotation.eulerAngles.z);
         gunMount.transform.rotation = Quaternion.Slerp(gunMount.transform.rotation, flatRotation, Time.deltaTime * trackDamping);
     }
 
@@ -214,6 +214,11 @@ public class TurretBehavior : MonoBehaviour
     {
         get { return trackDefaultState; }
         set { trackDefaultState = value; }
+    }
+
+    public void SetProximateObject(GameObject obj)
+    {
+        this.proximateObject = obj;
     }
 
 }

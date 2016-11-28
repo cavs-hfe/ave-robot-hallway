@@ -79,6 +79,14 @@ public class RobotDrivingBehavior : MonoBehaviour
         }
     }
 
+    public void OnTriggerEnter(Collider other)
+    {
+        if (other.tag.Equals("Stopper"))
+        {
+            this.speed = 0;
+        }
+    }
+
     /// <summary>
     /// Set the speed of the robot, in meters per second.
     /// </summary>

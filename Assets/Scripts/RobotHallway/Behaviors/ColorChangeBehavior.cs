@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[ExecuteInEditMode]
 public class ColorChangeBehavior : MonoBehaviour
 {
-
     public static Color Black = Color.black;
     public static Color Red = Color.red;
     public static Color Neutral = new Color(245, 245, 220);
@@ -16,9 +16,9 @@ public class ColorChangeBehavior : MonoBehaviour
     [SerializeField]
     private Color bodyColor;
 
-    void Start()
+    //allows color to be updated in edit mode
+    void Update()
     {
-        //set body color to initial color
         bodyMaterial.color = bodyColor;
     }
 
