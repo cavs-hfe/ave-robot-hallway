@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 public class RobotDrivingBehavior : MonoBehaviour
@@ -26,12 +27,23 @@ public class RobotDrivingBehavior : MonoBehaviour
     [Tooltip("Rate to turn robot, in degrees per second")]
     private float turnSpeed = 20;
 
+    private void Update()
+    {
+        // debug shortcut to end level
+        if (Input.GetButtonUp("Fire1"))
+        {
+            Debug.Log("Button Down");
+            SceneManager.LoadScene(1);
+        }
+    }
 
     void FixedUpdate()
     {
+        
+
         if (!hasTurned && !turning)
         {
-            Debug.Log("Time to turn?");
+            //Debug.Log("Time to turn?");
             //check to see how close we are to the target position
             float distance = Mathf.Abs(this.transform.position.x - hallwayPosition);
             if (distance < tolerance)
@@ -40,17 +52,22 @@ public class RobotDrivingBehavior : MonoBehaviour
                 turning = true;
 
                 //set goal angle/direction
+                //Debug.Log("Start Target: " + startTarget);
                 if (startTarget == ExperimentController.Condition.Target.A || startTarget == ExperimentController.Condition.Target.C)
                 {
                     //turn left (subtract 90 from start angle)
                     //goalRotation *= Quaternion.AngleAxis(270, Vector3.up);
-                    goalRotation = Quaternion.Euler(new Vector3(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y - 90 % 360, transform.rotation.eulerAngles.z));
+                    //float angle = (transform.rotation.eulerAngles.y + 90) % 360;
+                    //Debug.Log("Turn Left from " + transform.rotation.eulerAngles.y + " to " + angle);
+                    
+                    goalRotation = Quaternion.Euler(new Vector3(transform.rotation.eulerAngles.x, (transform.rotation.eulerAngles.y - 90) % 360, transform.rotation.eulerAngles.z));
                 }
                 else
                 {
+                    //float angle = (transform.rotation.eulerAngles.y + 90) % 360;
+                    //Debug.Log("Turn Right from " + transform.rotation.eulerAngles.y + " to " + angle);
                     //turn right (add 90 to start angle)
-                    //goalRotation *= Quaternion.AngleAxis(90, Vector3.up);
-                    goalRotation = Quaternion.Euler(new Vector3(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y + 90 % 360, transform.rotation.eulerAngles.z));
+                    goalRotation = Quaternion.Euler(new Vector3(transform.rotation.eulerAngles.x, (transform.rotation.eulerAngles.y + 90) % 360, transform.rotation.eulerAngles.z));
                 }
             }
             else
@@ -61,7 +78,7 @@ public class RobotDrivingBehavior : MonoBehaviour
         }
         else if (turning)
         {
-            Debug.Log("Turning, goal: " + goalRotation.ToString());
+            //Debug.Log("Turning, goal: " + goalRotation.ToString());
 
             this.transform.rotation = Quaternion.Lerp(transform.rotation, goalRotation, turnSpeed * Time.time);
 
@@ -73,7 +90,7 @@ public class RobotDrivingBehavior : MonoBehaviour
         }
         else
         {
-            Debug.Log("Done turning, driving");
+            //Debug.Log("Done turning, driving");
             //move forward
             this.transform.Translate(Vector3.forward * speed * Time.deltaTime);
         }

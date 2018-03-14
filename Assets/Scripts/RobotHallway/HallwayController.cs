@@ -3,7 +3,6 @@ using System.Collections;
 
 public class HallwayController : MonoBehaviour
 {
-
     public GameObject robot;
 
     public GameObject ABStopper;
@@ -25,13 +24,13 @@ public class HallwayController : MonoBehaviour
     public void SetupCondition(ExperimentController.Condition c)
     {
         //set robot behaviors
-        robot.GetComponent<RobotDrivingBehavior>().SetSpeed(c.speed);
-        robot.GetComponent<RobotDrivingBehavior>().SetTargets(c.playerStartTarget, c.playerGoalTarget);
-        robot.GetComponent<RobotDrivingBehavior>().setHallwayPosition(c.hallwayPosition);
-
         robot.GetComponent<ColorChangeBehavior>().SetBodyColor(c.bodyColor);
 
-        robot.GetComponent<TurretBehavior>().CurrentTurretState = c.turretBehavior;
+        robot.GetComponent<RobotDrivingBehavior>().SetSpeed(c.speed);
+        robot.GetComponent<RobotDrivingBehavior>().SetTargets(c.robotStartTarget, c.robotGoalTarget);
+        robot.GetComponent<RobotDrivingBehavior>().setHallwayPosition(c.hallwayPosition);
+
+        robot.GetComponent<TurretBehavior>().CurrentTurretState = c.turretBehavior;     // always none
 
         //set robot start position/rotation
         if (c.robotStartTarget == ExperimentController.Condition.Target.A)
@@ -51,15 +50,16 @@ public class HallwayController : MonoBehaviour
             robot.transform.position = targetD.transform.position;
         }
 
+        // set robot initial orientation
         if (c.robotStartTarget == ExperimentController.Condition.Target.A || c.robotStartTarget == ExperimentController.Condition.Target.D)
         {
             robot.transform.rotation = Quaternion.Euler(0, 90, 0);
-            Debug.Log("Setting rotation to 90");
+            //Debug.Log("Setting rotation to 90");
         }
         else
         {
             robot.transform.rotation = Quaternion.Euler(0, 270, 0);
-            Debug.Log("Setting rotation to 270");
+            //Debug.Log("Setting rotation to 270");
         }
 
         //set up stopper
@@ -72,7 +72,7 @@ public class HallwayController : MonoBehaviour
             CDStopper.SetActive(false);
         }
 
-        //setup player goal
+        // setup player goal
         if (c.playerGoalTarget.Equals(ExperimentController.Condition.Target.A))
         {
             targetA.GetComponent<CapsuleCollider>().enabled = true;
@@ -90,7 +90,7 @@ public class HallwayController : MonoBehaviour
             targetD.GetComponent<CapsuleCollider>().enabled = true;
         }
 
-        //set up doors
+        // set up doors
         if (c.openDoors != null)
         {
             foreach (ExperimentController.Condition.Door d in c.openDoors)

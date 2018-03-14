@@ -6,9 +6,10 @@ public class ColorChangeBehavior : MonoBehaviour
 {
     public static Color Black = Color.black;
     public static Color Red = Color.red;
-    public static Color Neutral = new Color(245, 245, 220);
+    public static Color Neutral = new Color(245.0f/255.0f, 245.0f/255.0f, 220.0f/255.0f);
     public static Color Yellow = Color.yellow;
-    public static Color Green = new Color(124, 252, 0);
+    public static Color Green = new Color(0, 252.0f/255.0f, 0);
+    public static Color Maroon = new Color(88.0f/255.0f, 0, 0);
 
     [Tooltip("Material of body (recommended to use Standard Shader)")]
     public Material bodyMaterial;
@@ -30,6 +31,7 @@ public class ColorChangeBehavior : MonoBehaviour
     {
         this.bodyColor = color;
         bodyMaterial.color = bodyColor;
+        //Debug.Log("Set color to " + bodyColor);
     }
 
     /// <summary>
